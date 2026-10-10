@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Booking Platform - Design Preview</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            margin: 40px auto; 
+            max-width: 1000px; 
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 { color: #0056b3; }
+        .mermaid { 
+            margin: 20px 0; 
+            display: flex; 
+            justify-content: center; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .content-section {
+            background: white;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+    <!-- Load Mermaid via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            mermaid.initialize({ startOnLoad: true });
+        });
+    </script>
+</head>
+<body>
+    <h1>Travel Booking Platform - Design Preview</h1>
+
+    <div class="content-section">
+        <h2>1. Functional Requirements</h2>
+        <h3>Admin</h3>
+        <ol>
+            <li>Manage users and roles across the platform.</li>
+            <li>Approve or reject new listings submitted by Travel Agents.</li>
+            <li>Manage global system settings.</li>
+            <li>View booking statistics and track pending approvals.</li>
+        </ol>
+        
+        <h3>Travel Agent</h3>
+        <ol>
+            <li>Create, update, and manage listings for flights, hotels, and rental cars.</li>
+            <li>Send and receive messages with travelers.</li>
+            <li>Track bookings associated with their managed listings.</li>
+        </ol>
+        
+        <h3>Traveler</h3>
+        <ol>
+            <li>Search the platform and book available flights, hotels, and rental cars.</li>
+            <li>View "My Bookings" with real-time status (confirmed or pending).</li>
+            <li>View and manage personal travel itineraries.</li>
+            <li>Send and receive messages with Travel Agents.</li>
+        </ol>
+    </div>
+
+    <div class="content-section">
+        <h2>2. Use-Case Diagram</h2>
+        <div class="mermaid">
+flowchart LR
+    %% Actors
+    Admin([Admin])
+    Agent([Travel Agent])
+    Traveler([Traveler])
+
+    %% Admin Use Cases
+    Admin --- U1(Manage Users & Roles)
+    Admin --- U2(Approve/Reject Listings)
+    Admin --- U3(Manage System Settings)
+    Admin --- U4(View Booking Statistics)
+
+    %% Agent Use Cases
+    Agent --- U5(Create/Manage Listings)
+    Agent --- U6(Track Bookings)
+    Agent --- U7(Message Travelers)
+
+    %% Traveler Use Cases
+    Traveler --- U8(Search & Book Listings)
+    Traveler --- U9(View My Bookings)
+    Traveler --- U10(Manage Itineraries)
+    Traveler --- U7
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>3. Entity-Relationship (ER) Diagram</h2>
+        <div class="mermaid">
+erDiagram
+    users {
+        int id PK
+        string name
+        string email UK
+        string password_hash
+        string role "ADMIN, AGENT, TRAVELER"
+        boolean active
+    }
+    settings {
+        int id PK
+        string setting_key
+        string setting_value
+    }
+    listings {
+        int id PK
+        int agent_id FK
+        string type "FLIGHT, HOTEL, CAR"
+        string title
+        decimal price
+        int available_count
+        string status "PENDING, APPROVED, REJECTED"
+    }
+    flight_details {
+        int listing_id PK, FK
+        string origin
+        string destination
+        datetime departure_time
+    }
+    hotel_details {
+        int listing_id PK, FK
+        string city
+    }
+    car_details {
+        int listing_id PK, FK
+        string pickup_city
+        string car_type
+    }
+    bookings {
+        int id PK
+        int traveler_id FK
+        int listing_id FK
+        string status "PENDING, CONFIRMED, CANCELLED"
+        date start_date
+        date end_date
+        datetime booked_at
+    }
+    itineraries {
+        int id PK
+        int traveler_id FK
+        string name
+    }
+    itinerary_items {
+        int itinerary_id PK, FK
+        int booking_id PK, FK
+    }
+    messages {
+        int id PK
+        int sender_id FK
+        int receiver_id FK
+        text content
+        datetime sent_at
+    }
+
+    users ||--o{ listings : creates
+    users ||--o{ bookings : makes
+    users ||--o{ itineraries : manages
+    users ||--o{ messages : sends
+    users ||--o{ messages : receives
+    listings ||--o| flight_details : has
+    listings ||--o| hotel_details : has
+    listings ||--o| car_details : has
+    listings ||--o{ bookings : "is_booked_in"
+    itineraries ||--o{ itinerary_items : contains
+    bookings ||--o{ itinerary_items : "is_part_of"
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>4. Class Diagram</h2>
+        <!-- Using HTML entities to ensure < and > don't break the HTML parser -->
+        <div class="mermaid">
+classDiagram
+    class User {
+        &lt;&lt;abstract&gt;&gt;
+        -int id
+        -String name
+        -String email
+        -String passwordHash
+        -String role
+        +login()
+        +logout()
+    }
+    class Admin {
+        +manageUsers()
+        +approveListing()
+        +manageSettings()
+    }
+    class TravelAgent {
+        +createListing()
+        +trackBookings()
+        +sendMessage()
+    }
+    class Traveler {
+        +searchListings()
+        +bookListing()
+        +manageItinerary()
+    }
+    
+    User &lt;|-- Admin
+    User &lt;|-- TravelAgent
+    User &lt;|-- Traveler
+
+    class Bookable {
+        &lt;&lt;interface&gt;&gt;
+        +book(Traveler traveler) boolean
+        +checkAvailability() boolean
+    }
+
+    class Listing {
+        &lt;&lt;abstract&gt;&gt;
+        -int id
+        -int agentId
+        -String type
+        -String title
+        -double price
+        -int availableCount
+        -String status
+        +calculateTotal() double
+    }
+    class FlightListing {
+        -String origin
+        -String destination
+        -Date departureTime
+    }
+    class HotelListing {
+        -String city
+    }
+    class CarListing {
+        -String pickupCity
+        -String carType
+    }
+
+    Listing &lt;|-- FlightListing
+    Listing &lt;|-- HotelListing
+    Listing &lt;|-- CarListing
+    Listing ..|&gt; Bookable
+
+    class TravelException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class NoAvailabilityException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class InvalidBookingException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class UnauthorizedActionException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class DataAccessException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+
+    TravelException &lt;|-- NoAvailabilityException
+    TravelException &lt;|-- InvalidBookingException
+    TravelException &lt;|-- UnauthorizedActionException
+    TravelException &lt;|-- DataAccessException
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>5. Layered Architecture</h2>
+        <ol>
+            <li><strong>Servlet (Controller):</strong> Handles HTTP requests (GET/POST), reads parameters, manages the user Session, calls the Service layer, and forwards data to JSPs.</li>
+            <li><strong>Service (Business Logic):</strong> Contains core business rules, handles custom exceptions, manages transactions, and deals with multithreading if required.</li>
+            <li><strong>DAO (Data Access Object):</strong> Executes SQL queries using JDBC <code>PreparedStatement</code>, handles result sets, and abstracts away database specifics.</li>
+            <li><strong>Database (MySQL):</strong> The persistence layer maintaining data integrity and relations.</li>
+        </ol>
+    </div>
+</body>
+</html>

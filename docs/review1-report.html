@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review 1 Report: Travel Booking Platform</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: auto; padding: 20px; }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        h3 { color: #34495e; }
+        .title-page { text-align: center; margin-top: 100px; margin-bottom: 100px; page-break-after: always; }
+        .title-page h1 { border: none; font-size: 2.5em; margin-bottom: 50px; }
+        .title-page p { font-size: 1.2em; margin: 10px 0; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; border: 1px solid #ddd; }
+        code { font-family: Consolas, monospace; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table, th, td { border: 1px solid #bdc3c7; }
+        th, td { padding: 12px; text-align: left; }
+        th { background-color: #ecf0f1; }
+        img { max-width: 100%; height: auto; display: block; margin: 20px auto; border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .page-break { page-break-before: always; }
+        .mermaid { margin: 20px 0; display: flex; justify-content: center; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media print {
+            body { max-width: 100%; padding: 0; }
+            .page-break { page-break-before: always; }
+            .title-page { margin-top: 30%; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            mermaid.initialize({ startOnLoad: true });
+        });
+    </script>
+</head>
+<body>
+
+    <div class="title-page">
+        <h1>Review 1 Report<br>Travel Booking Platform</h1>
+        <p><strong>Team Name:</strong> [Team Name]</p>
+        <p><strong>Members:</strong> [Members]</p>
+        <p><strong>Roll Numbers:</strong> [Roll Numbers]</p>
+        <p><strong>Faculty Mentor:</strong> [Faculty Mentor]</p>
+    </div>
+
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#req">Requirements</a></li>
+        <li><a href="#design">System Design</a></li>
+        <li><a href="#tech">Technology Stack</a></li>
+        <li><a href="#impl">Implementation Evidence (Code Snippets)</a></li>
+        <li><a href="#trace">Traceability Matrix</a></li>
+        <li><a href="#db">Database Initialization (Listings)</a></li>
+        <li><a href="#features">Working Features & Screenshots</a></li>
+        <li><a href="#testing">Testing</a></li>
+        <li><a href="#limits">Limitations and Review 2 Plan</a></li>
+        <li><a href="#run">How to Run</a></li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <h2 id="intro">1. Introduction</h2>
+    <p>The Travel Booking Platform is a comprehensive web-based application designed to facilitate seamless travel arrangements. It connects travelers with travel agents, allowing for the listing, browsing, and booking of hotels, flights, and rental cars in a single unified interface.</p>
+
+    <h2 id="req">2. Requirements</h2>
+    <p>The system serves three primary user roles:</p>
+    <ul>
+        <li><strong>Admin</strong>: Oversees the entire platform. Approves or rejects new listings submitted by agents to ensure quality control.</li>
+        <li><strong>Travel Agent</strong>: Creates and manages travel listings (hotels, flights, cars). They can monitor the status of their listings (PENDING, APPROVED, REJECTED).</li>
+        <li><strong>Traveler</strong>: Browses approved listings, searches by keyword or type, and makes bookings for specific dates. They can view their booking history.</li>
+    </ul>
+
+    <h2 id="design">3. System Design</h2>
+    <h3>Use Case Diagram</h3>
+    <p>The Use Case Diagram illustrates the interactions between the three actors (Admin, Agent, Traveler) and the system.</p>
+    <div class="mermaid">
+flowchart LR
+    %% Actors
+    Admin([Admin])
+    Agent([Travel Agent])
+    Traveler([Traveler])
+
+    %% Admin Use Cases
+    Admin --- U1(Manage Users & Roles)
+    Admin --- U2(Approve/Reject Listings)
+    Admin --- U3(Manage System Settings)
+    Admin --- U4(View Booking Statistics)
+
+    %% Agent Use Cases
+    Agent --- U5(Create/Manage Listings)
+    Agent --- U6(Track Bookings)
+    Agent --- U7(Message Travelers)
+
+    %% Traveler Use Cases
+    Traveler --- U8(Search & Book Listings)
+    Traveler --- U9(View My Bookings)
+    Traveler --- U10(Manage Itineraries)
+    Traveler --- U7
+    </div>
+
+    <h3>Entity-Relationship (ER) Diagram</h3>
+    <p>The ER Diagram models the database schema, showcasing the relationships between users, listings, detailed listing tables (hotel_details, flight_details, car_details) to support polymorphism, and bookings.</p>
+    <div class="mermaid">
+erDiagram
+    users {
+        int id PK
+        string name
+        string email UK
+        string password_hash
+        string role "ADMIN, AGENT, TRAVELER"
+        boolean active
+    }
+    settings {
+        int id PK
+        string setting_key
+        string setting_value
+    }
+    listings {
+        int id PK
+        int agent_id FK
+        string type "FLIGHT, HOTEL, CAR"
+        string title
+        decimal price
+        int available_count
+        string status "PENDING, APPROVED, REJECTED"
+    }
+    flight_details {
+        int listing_id PK, FK
+        string origin
+        string destination
+        datetime departure_time
+    }
+    hotel_details {
+        int listing_id PK, FK
+        string city
+    }
+    car_details {
+        int listing_id PK, FK
+        string pickup_city
+        string car_type
+    }
+    bookings {
+        int id PK
+        int traveler_id FK
+        int listing_id FK
+        string status "PENDING, CONFIRMED, CANCELLED"
+        date start_date
+        date end_date
+        datetime booked_at
+    }
+    itineraries {
+        int id PK
+        int traveler_id FK
+        string name
+    }
+    itinerary_items {
+        int itinerary_id PK, FK
+        int booking_id PK, FK
+    }
+    messages {
+        int id PK
+        int sender_id FK
+        int receiver_id FK
+        text content
+        datetime sent_at
+    }
+
+    users ||--o{ listings : creates
+    users ||--o{ bookings : makes
+    users ||--o{ itineraries : manages
+    users ||--o{ messages : sends
+    users ||--o{ messages : receives
+    listings ||--o| flight_details : has
+    listings ||--o| hotel_details : has
+    listings ||--o| car_details : has
+    listings ||--o{ bookings : "is_booked_in"
+    itineraries ||--o{ itinerary_items : contains
+    bookings ||--o{ itinerary_items : "is_part_of"
+    </div>
+
+    <h3>Class Diagram</h3>
+    <p>The Class Diagram maps the Object-Oriented design, highlighting inheritance (e.g., User -&gt; Admin, Agent, Traveler), abstract classes, and DAO interfaces.</p>
+    <div class="mermaid">
+classDiagram
+    class User {
+        &lt;&lt;abstract&gt;&gt;
+        -int id
+        -String name
+        -String email
+        -String passwordHash
+        -String role
+        +login()
+        +logout()
+    }
+    class Admin {
+        +manageUsers()
+        +approveListing()
+        +manageSettings()
+    }
+    class TravelAgent {
+        +createListing()
+        +trackBookings()
+        +sendMessage()
+    }
+    class Traveler {
+        +searchListings()
+        +bookListing()
+        +manageItinerary()
+    }
+    
+    User &lt;|-- Admin
+    User &lt;|-- TravelAgent
+    User &lt;|-- Traveler
+
+    class Bookable {
+        &lt;&lt;interface&gt;&gt;
+        +book(Traveler traveler) boolean
+        +checkAvailability() boolean
+    }
+
+    class Listing {
+        &lt;&lt;abstract&gt;&gt;
+        -int id
+        -int agentId
+        -String type
+        -String title
+        -double price
+        -int availableCount
+        -String status
+        +calculateTotal() double
+    }
+    class FlightListing {
+        -String origin
+        -String destination
+        -Date departureTime
+    }
+    class HotelListing {
+        -String city
+    }
+    class CarListing {
+        -String pickupCity
+        -String carType
+    }
+
+    Listing &lt;|-- FlightListing
+    Listing &lt;|-- HotelListing
+    Listing &lt;|-- CarListing
+    Listing ..|&gt; Bookable
+
+    class TravelException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class NoAvailabilityException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class InvalidBookingException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class UnauthorizedActionException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+    class DataAccessException {
+        &lt;&lt;Exception&gt;&gt;
+    }
+
+    TravelException &lt;|-- NoAvailabilityException
+    TravelException &lt;|-- InvalidBookingException
+    TravelException &lt;|-- UnauthorizedActionException
+    TravelException &lt;|-- DataAccessException
+    </div>
+
+    <h2 id="tech">4. Technology Stack</h2>
+    <ul>
+        <li><strong>Backend:</strong> Java 17, Jakarta EE (Servlets, JSP, Filters)</li>
+        <li><strong>Database:</strong> MySQL 8.0, JDBC</li>
+        <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript (JSP for dynamic content)</li>
+        <li><strong>Build Tool:</strong> Maven</li>
+        <li><strong>Testing:</strong> JUnit 5</li>
+        <li><strong>Server:</strong> Apache Tomcat 10+</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2 id="impl">5. Implementation Evidence (Code Snippets)</h2>
+    
+    <h3>Object-Oriented Programming (OOP)</h3>
+    <p><strong>File:</strong> <code>src/main/java/com/travel/model/Traveler.java</code></p>
+    <pre><code>package com.travel.model;
+
+/** Shows Inheritance (extends User). */
+public class Traveler extends User {
+    public Traveler() { super(); }
+    public Traveler(int id, String name, String email, String passwordHash) {
+        super(id, name, email, passwordHash, Role.TRAVELER);
+    }
+}</code></pre>
+
+    <h3>Collections Framework</h3>
+    <p><strong>File:</strong> <code>src/main/java/com/travel/dao/ListingDao.java</code></p>
+    <pre><code>    public List&lt;Listing&gt; findByAgent(int agentId) {
+        // ... SQL query logic ...
+        List&lt;Listing&gt; listings = new ArrayList&lt;&gt;();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, agentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) listings.add(mapListing(rs));
+            }
+        } // ... catch block ...
+        return listings;
+    }</code></pre>
+
+    <h3>Multithreading</h3>
+    <p><strong>File:</strong> <code>src/main/java/com/travel/service/BookingService.java</code></p>
+    <pre><code>    private void sendConfirmationAsync(Booking booking) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -&gt; {
+            System.out.println("Async Task: Sending confirmation email for Booking ID " + booking.getId());
+        });
+        executor.shutdown(); // Properly shut down thread pool
+    }</code></pre>
+
+    <h3>JDBC (Transaction with Commit/Rollback)</h3>
+    <p><strong>File:</strong> <code>src/main/java/com/travel/service/BookingService.java</code></p>
+    <pre><code>        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // ... database updates ...
+                listingDao.decreaseAvailability(listingId, conn);
+                bookingDao.save(booking, conn);
+                conn.commit();
+            } catch (TravelException e) {
+                conn.rollback();
+                throw e; // Rethrow exact domain exception
+            } // ... error handling and finally block with setAutoCommit(true) ...</code></pre>
+
+    <h3>Servlets (Auth Filter for Role Dashboards)</h3>
+    <p><strong>File:</strong> <code>src/main/java/com/travel/filter/AuthFilter.java</code></p>
+    <pre><code>        User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+        if (path.startsWith("/admin") && (user == null || user.getRole() != Role.ADMIN)) {
+            res.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        if (path.startsWith("/agent") && (user == null || user.getRole() != Role.AGENT)) {
+            res.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }</code></pre>
+
+    <h2 id="trace">6. Traceability Matrix</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Marking Criterion</th>
+                <th>Satisfying Files / Classes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Problem Understanding and Solution Design</td>
+                <td><code>User.java</code>, <code>Listing.java</code>, <code>docs/design-preview.html</code></td>
+            </tr>
+            <tr>
+                <td>Core Java Concepts (OOP, Threads, Collections)</td>
+                <td><code>Traveler.java</code>, <code>BookingService.java</code>, <code>ListingDao.java</code></td>
+            </tr>
+            <tr>
+                <td>Database Integration (JDBC, Transactions)</td>
+                <td><code>BookingService.java</code>, <code>ListingDao.java</code>, <code>DBConnection.java</code></td>
+            </tr>
+            <tr>
+                <td>Servlets and Web Integration (Sessions, Roles)</td>
+                <td><code>LoginServlet.java</code>, <code>AuthFilter.java</code>, <code>LogoutServlet.java</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2 id="db">7. Database Initialization (Listings)</h2>
+    <p>Data loaded via <code>seed.sql</code>:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Type</th><th>Title</th><th>Price</th><th>Available</th><th>Status</th><th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>HOTEL</td><td>Grand Plaza</td><td>$150.00</td><td>10</td><td>APPROVED</td><td>New York</td></tr>
+            <tr><td>2</td><td>HOTEL</td><td>Seaside Resort</td><td>$250.00</td><td>5</td><td>APPROVED</td><td>Miami</td></tr>
+            <tr><td>3</td><td>HOTEL</td><td>Mountain Inn</td><td>$120.00</td><td>8</td><td>APPROVED</td><td>Denver</td></tr>
+            <tr><td>4</td><td>HOTEL</td><td>City Center Hostel</td><td>$40.00</td><td>20</td><td>APPROVED</td><td>Chicago</td></tr>
+            <tr><td>5</td><td>FLIGHT</td><td>NY to London - Direct</td><td>$800.00</td><td>50</td><td>APPROVED</td><td>NY -&gt; London</td></tr>
+            <tr><td>6</td><td>FLIGHT</td><td>Chicago to Denver</td><td>$200.00</td><td>30</td><td>APPROVED</td><td>Chicago -&gt; Denver</td></tr>
+            <tr><td>7</td><td>CAR</td><td>Compact Car Rental</td><td>$45.00</td><td>15</td><td>APPROVED</td><td>Compact in NY</td></tr>
+            <tr><td>8</td><td>CAR</td><td>Luxury SUV Rental</td><td>$110.00</td><td>4</td><td>APPROVED</td><td>SUV in Denver</td></tr>
+            <tr><td>9</td><td>HOTEL</td><td>Desert Oasis Resort</td><td>$300.00</td><td>10</td><td>PENDING</td><td>Phoenix</td></tr>
+            <tr><td>10</td><td>HOTEL</td><td>Lakeside Cabins</td><td>$95.00</td><td>12</td><td>PENDING</td><td>Seattle</td></tr>
+        </tbody>
+    </table>
+
+    <h2 id="features">8. Working Features</h2>
+
+    <h3>8.1 Login Interface</h3>
+    <p>The secure login page is managed by the <code>LoginServlet</code>. It provides a clean form for users to enter their email and password, validating their credentials against the database and routing them to their respective role-based dashboards using the <code>AuthFilter</code>.</p>
+
+    <h3>8.2 Agent Dashboard</h3>
+    <p>The Agent Dashboard allows travel agents to manage their listings. Agents can submit new hotels, flights, or car rentals. Newly created listings appear here with a PENDING status, awaiting administrative review.</p>
+
+    <h3>8.3 Admin Dashboard</h3>
+    <p>The Admin Dashboard is a centralized control panel for system administrators. It displays a queue of all PENDING listings submitted by agents. Administrators can review the details and click to APPROVE or REJECT the listings, updating their visibility across the platform.</p>
+
+    <h3>8.4 Traveler Search</h3>
+    <p>The Traveler Search interface empowers users to look up travel options by entering keywords (e.g., 'Jaipur'). It queries the database for APPROVED listings matching the search criteria and displays the available options, prices, and stock counts.</p>
+
+    <h3>8.5 Booking Confirmation</h3>
+    <p>After a traveler selects a listing and specifies their dates, the Booking Confirmation screen shows the finalized reservation in 'My Bookings'. It confirms the transaction was successful and that the asynchronous confirmation email has been queued.</p>
+
+    <div class="page-break"></div>
+
+    <h2 id="testing">9. Testing</h2>
+    <p>Unit testing executed using JUnit via Maven <code>surefire-plugin</code>.</p>
+    <p><strong>Real <code>mvn test</code> output:</strong></p>
+    <pre><code>[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.travel.dao.ListingDaoTest
+--- APPROVED HOTELS ---
+Grand Plaza
+Seaside Resort
+Mountain Inn
+City Center Hostel
+Desert Oasis Resort
+Test Hotel
+-----------------------
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.793 s -- in com.travel.dao.ListingDaoTest
+[INFO] Running com.travel.service.BookingServiceTest
+Async Task: Sending confirmation email for Booking ID 53
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.189 s -- in com.travel.service.BookingServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] BUILD SUCCESS</code></pre>
+
+    <h2 id="limits">10. Limitations and Review 2 Plan</h2>
+    <ul>
+        <li><strong>Limitations:</strong> Currently missing itinerary bundling, in-app messaging between travelers and agents, and advanced payment gateway integration.</li>
+        <li><strong>Review 2 Scope:</strong>
+            <ul>
+                <li>Complete integration of Flights and Cars searches.</li>
+                <li>Custom Itineraries (bundling hotel + flight + car).</li>
+                <li>Messaging System.</li>
+                <li>Full-featured analytics on Agent/Admin dashboards.</li>
+                <li>Broader JUnit test coverage.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2 id="run">11. How to Run</h2>
+    <ol>
+        <li>Run MySQL server and execute <code>schema.sql</code> and <code>seed.sql</code>.</li>
+        <li>Update database credentials in <code>src/main/java/com/travel/util/DBConnection.java</code>.</li>
+        <li>Run <code>mvn clean install</code>.</li>
+        <li>Deploy the generated WAR file to Tomcat 10.</li>
+        <li>Access the application at <code>http://localhost:8080/travel-booking-platform/login</code>.</li>
+    </ol>
+
+</body>
+</html>
